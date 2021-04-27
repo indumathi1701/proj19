@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"> </script>
+     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+</head>
+
+<style>
+    #tab 
+    {
+        border: 1px solid grey;
+        width: 350px;
+        padding: 5px;
+        font-family: Verdana, sans-serif;
+        font-size: 20px;
+    }
+    
+
+    .list
+     {
+        border: 1px solid grey;
+        margin-top: 0px;
+        width: 348px;
+        list-style-type: none;
+        
+     overflow:auto;
+        padding-left: 0px;
+        height: 300px;
+     }
+
+    li:hover
+     {
+        background-color: lightgray;
+        color: black;
+        padding-left: 0px;
+    }
+
+    .personimage 
+    {
+        vertical-align: middle;
+        width: 40px;
+        height: 40px;
+        border-radius: 100%;
+    }
+   
+    .lis
+    {
+        list-style-type: none;
+        height: 50px;
+    }
+    
+</style>
+
+<body>
+    <table id=tab>
+        <tr>
+            <th> Contacts</th>
+        </tr>
+    </table>
+    <div >
+        <ul class="list " id="table"></ul>
+    </div>
+</body>
+
+<script>
+
+    $(document).ready(function () 
+    {
+        var element = document.getElementById('table');
+        var ContactSource = LoadDataSource();
+        LoadIntialData();
+      
+        function LoadIntialData() 
+        {
+                var persons = '';
+
+                for ( i = 0; i < 9; i++)
+                {
+                        id = "id=" + i;
+                        persons += '<li class="lis"' + id + ' >' +
+                            ' <img src="https://c8.alamy.com/comp/K4AFFG/user-icon-male-avatar-in-business-suit-businessman-flat-icon-man-in-K4AFFG.jpg"  class="personimage">' +
+                        ContactSource[i].firstName + '</li>';
+                }
+                $('#table').append(persons);
+   
+      }
+        //start
+        var TimerId;
+        var listheight= $('.lis').height();
+        var len=$("li").length;
+        var oldscroll=0;
+        var lastscroll=0;
+        var remaining=0;
+       
+        //scroll event  
+        $(element).scroll(function()
+        {
+            var elmnt = document.getElementById("table");
+            var scrollheight = elmnt.scrollHeight;
+            var clientheight = elmnt.clientHeight;
+            var scrolleddistance = elmnt.scrollTop;//56  //100    //44
+            console.log("scrolltop"+scrolleddistance)
+            if(scrolleddistance>oldscroll) {//(oldscroll inially=0,, (56>0))  //(100>56)  
+                var difference = scrolleddistance - oldscroll;//56=56-0    //44=100-56     
+              //  console.log("differnce"+difference)
+            }
+            else {
+                var difference = oldscroll - scrolleddistance;
+            }
+            var temp = scrolleddistance;//56   //100  
+            temp= difference + remaining;//56   //50=44+6   
+            var count = Math.floor(temp/listheight);//1=56/50  //1=50/50
+              var startindex = parseInt($('#table > li:first-child').attr("id"));//0  first (duplicate),//0 second  //1 
+              var endindex = parseInt($('#table > li:last-child').attr("id"));//8  //9\
+           clearTimeout(TimerId);
+       
+            if (count > 0)  {  //(1/>0 true)   //(1>0)
+                TimerId = setTimeout(function()
+                {
+                   
+                   if(scrolleddistance>=50){
+                    remaining = Math.floor(scrolleddistance%listheight);//6=56%50 //0=100%50
+                     
+                    staticupdateElement(scrolleddistance,lastscroll,startindex,endindex,count);
+                    
+                    lastscroll=scrolleddistance;
+                   
+
+                   }
+                 }, 250);   
+            }
+          
+           
+        });
+        
+        function  staticupdateElement(scrolleddistance,lastscroll,startindex,endindex,count)
+        {
+           
+                  
+            var lists='';
+            if(scrolleddistance>lastscroll)
+            {
+                var lists='';
+                var listcount=0; 
+                 var idcount=0;
+                // console.log("start & end " + startindex + "," + endindex);
+                for(var l=startindex;l<=endindex;l++)//(l=0,i<=8)    //(l=1;l<=9)
+                {
+                            
+                    //[0+1]   //(1+1)=2(o get replaced by 8)
+                   
+                 $($("li")[listcount]).text(ContactSource[startindex+count].firstName)  //listcount =accesssing the li eleement
+                 $($("li")[listcount]).attr("id",startindex+count); 
+             $($("li")[listcount]).prepend("<img src=" + "https://c8.alamy.com/comp/K4AFFG/user-icon-male-avatar-in-business-suit-businessman-flat-icon-man-in-K4AFFG.jpg" + " class=" + "personimage>");
+                 // $($("li")[listcount]).find('img').attr("src", "https://c8.alamy.com/comp/K4AFFG/user-icon-male-avatar-in-business-suit-businessman-flat-icon-man-in-K4AFFG.jpg" + " class=" + "personimage>");
+                listcount++;  
+
+                startindex++;              
+                }
+                 oldscroll=scrolleddistance;
+                
+            }
+    
+            else if(scrolleddistance<lastscroll)
+            {
+                var lists='';
+                var listcount=0; 
+                 var idcount=0;
+                 console.log("upscroll")
+                for(var l=startindex;l<=endindex;l++)
+                {
+
+                 $($("li")[listcount]).text(ContactSource[startindex-count].firstName)  
+                 $($("li")[listcount]).attr("id",startindex-count);
+                 $($("li")[listcount]).prepend("<img src=" + "https://c8.alamy.com/comp/K4AFFG/user-icon-male-avatar-in-business-suit-businessman-flat-icon-man-in-K4AFFG.jpg" + " class=" + "personimage>");
+               //$(this).find("img").attr("src");
+                listcount++;  
+                startindex++;              
+                }
+                //oldscroll=scrolleddistance;
+              //56=56   //
+            }
+         }
+       
+     
+});
+
+
+
+
+
+  function LoadDataSource() 
+        {
+
+            var dataSource = [
+                {
+
+                    "id": 1,
+                    "firstName": "Aruna",
+                    "lastName": "sekar",
+                    "phonenumber": 9920209078
+                },
+                {
+                    "id": 2,
+                    "firstName": "Megha",
+                    "lastName": "Durai"
+                },
+                {
+                    "id": 3,
+                    "firstName": "subiksha",
+                    "lastName": "jayaraman",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 4,
+                    "firstName": "santhosh",
+                    "lastName": "dillibabu",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 5,
+                    "firstName": "kowsalya",
+                    "lastName": "sekar",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 6,
+                    "firstName": "subi",
+                    "lastName": "raman",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 7,
+                    "firstName": "akshya",
+                    "lastName": "kandasamy",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 8,
+                    "firstName": "glo",
+                    "lastName": "winty",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 9,
+                    "firstName": "sowndarya",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 10,
+                    "firstName": "sandhiya",
+                    "lastName": "sekar",
+                    "phonenumber": 9920209078
+                },
+                {
+                    "id": 11,
+                    "firstName": "sekar",
+                    "lastName": "winty",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 12,
+                    "firstName": "harini",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 13,
+                    "firstName": "Hema",
+                    "lastName": "sekar",
+                    "phonenumber": 9920209078
+                },
+                {
+                    "id": 14,
+                    "firstName": "yazhlini",
+                    "lastName": "winty",
+                    "phonenumber": 9920209023
+                },
+                {
+                    "id": 15,
+                    "firstName": "15",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 16,
+                    "firstName": "16",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 17,
+                    "firstName": "17",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 18,
+                    "firstName": "18",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 19,
+                    "firstName": "19",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 20,
+                    "firstName": "20",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 21,
+                    "firstName": "21",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 22,
+                    "firstName": "22",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 23,
+                    "firstName": "23",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 24,
+                    "firstName": "24",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 25,
+                    "firstName": "25",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 26,
+                    "firstName": "26",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                } ,
+                {
+                    "id": 26,
+                    "firstName": "26",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 27,
+                    "firstName": "27",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 28,
+                    "firstName": "28",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 29,
+                    "firstName": "29",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                },
+                {
+                    "id": 30,
+                    "firstName": "30",
+                    "lastName": "samvel",
+                    "phonenumber": 9920205666
+                }
+
+
+            ];
+
+
+            return dataSource;
+        }
+    
+</script>
+
+</html>
